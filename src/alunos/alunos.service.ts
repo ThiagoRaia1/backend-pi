@@ -7,6 +7,8 @@ import { ObjectId, Repository } from 'typeorm';
 
 import { Aluno } from './entities/aluno.entity';
 
+import * as bcrypt from 'bcrypt';
+
 @Injectable()
 export class AlunosService {
   constructor(
@@ -14,20 +16,27 @@ export class AlunosService {
     private alunosRepository: Repository<Aluno>
   ) { }
 
+  // Valida o login
   async autenticar(login: string, senha: string): Promise<Aluno> {
-    const aluno = await this.alunosRepository.findOneBy({ login, senha });
-
+    const aluno = await this.alunosRepository.findOneBy({ login });
     if (!aluno) {
       throw new Error('Login ou senha inválidos');
     }
-
+    const senhaCorreta = await bcrypt.compare(senha, aluno.senha);
+    if (!senhaCorreta) {
+      throw new Error('Login ou senha inválidos');
+    }
     return aluno;
   }
 
-  create(createAlunoDto: CreateAlunoDto) {
-    const newAluno = this.alunosRepository.create(createAlunoDto)
-    return this.alunosRepository.save(newAluno)
-    // return 'This action adds a new aluno';
+  // Cria o aluno com hash na senha
+  async create(createAlunoDto: CreateAlunoDto): Promise<Aluno> {
+    const hashedSenha = await bcrypt.hash(createAlunoDto.senha, 10); // 10 = salt rounds
+    const novoAluno = this.alunosRepository.create({
+      ...createAlunoDto,
+      senha: hashedSenha,
+    });
+    return this.alunosRepository.save(novoAluno);
   }
 
   findAll() {
