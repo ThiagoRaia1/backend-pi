@@ -30,6 +30,10 @@ export class AlunosService {
     // return `This action returns a #${id} aluno`;
   }
 
+  async findOneByLogin(login: string) {
+    return this.alunosRepository.findOne({ where: { login } });
+  }
+
   async update(id: string, updateAlunoDto: UpdateAlunoDto) {
     await this.alunosRepository.update(
       { _id: new ObjectId(id) },
