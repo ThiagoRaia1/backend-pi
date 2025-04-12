@@ -14,6 +14,16 @@ export class AlunosService {
     private alunosRepository: Repository<Aluno>
   ) { }
 
+  async autenticar(login: string, senha: string): Promise<Aluno> {
+    const aluno = await this.alunosRepository.findOneBy({ login, senha });
+
+    if (!aluno) {
+      throw new Error('Login ou senha inválidos');
+    }
+
+    return aluno;
+  }
+
   create(createAlunoDto: CreateAlunoDto) {
     const newAluno = this.alunosRepository.create(createAlunoDto)
     return this.alunosRepository.save(newAluno)

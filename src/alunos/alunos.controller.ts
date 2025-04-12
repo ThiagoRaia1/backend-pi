@@ -2,10 +2,17 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AlunosService } from './alunos.service';
 import { CreateAlunoDto } from './dto/create-aluno.dto';
 import { UpdateAlunoDto } from './dto/update-aluno.dto';
+import { Aluno } from './entities/aluno.entity';
 
 @Controller('alunos')
 export class AlunosController {
   constructor(private readonly alunosService: AlunosService) {}
+
+  @Post('login')
+  async login(@Body() body: { login: string; senha: string }): Promise<Aluno> {
+    const { login, senha } = body;
+    return this.alunosService.autenticar(login, senha);
+  }
 
   @Post()
   create(@Body() createAlunoDto: CreateAlunoDto) {
