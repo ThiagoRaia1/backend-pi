@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateAlunoDto } from './dto/create-aluno.dto';
 import { UpdateAlunoDto } from './dto/update-aluno.dto';
 
@@ -16,17 +16,21 @@ export class AlunosService {
     private alunosRepository: Repository<Aluno>
   ) { }
 
-  // Valida o login
-  async autenticar(login: string, senha: string): Promise<Aluno> {
+  async autenticar(login: string, senha: string): Promise<Omit<Aluno, '_id' | 'senha'>> {
     const aluno = await this.alunosRepository.findOneBy({ login });
+
     if (!aluno) {
-      throw new Error('Login ou senha inválidos');
+      throw new NotFoundException('Aluno não encontrado');
     }
+
     const senhaCorreta = await bcrypt.compare(senha, aluno.senha);
     if (!senhaCorreta) {
-      throw new Error('Login ou senha inválidos');
+      throw new UnauthorizedException('Credenciais inválidas');
     }
-    return aluno;
+
+    // Remove _id e senha antes de retornar
+    const { _id, senha: _, ...alunoSemSenha } = aluno;
+    return alunoSemSenha;
   }
 
   // Cria o aluno com hash na senha

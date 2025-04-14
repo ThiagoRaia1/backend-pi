@@ -9,7 +9,7 @@ export class AlunosController {
   constructor(private readonly alunosService: AlunosService) {}
 
   @Post('login')
-  async login(@Body() body: { login: string; senha: string }): Promise<Aluno> {
+  async login(@Body() body: { login: string; senha: string }) {
     const { login, senha } = body;
     return this.alunosService.autenticar(login, senha);
   }
