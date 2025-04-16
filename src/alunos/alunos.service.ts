@@ -35,11 +35,24 @@ export class AlunosService {
 
   // Cria o aluno com hash na senha
   async create(createAlunoDto: CreateAlunoDto): Promise<Aluno> {
-    const hashedSenha = await bcrypt.hash(createAlunoDto.senha, 10); // 10 = salt rounds
+    // Verifica se já existe um aluno com o mesmo email
+    const alunoExistente = await this.alunosRepository.findOne({
+      where: { login: createAlunoDto.login }, // ou `email` se for esse o nome do campo
+    });
+
+    if (alunoExistente) {
+      throw new Error('Já existe um aluno cadastrado com esse email.');
+    }
+
+    // Criptografa a senha
+    const hashedSenha = await bcrypt.hash(createAlunoDto.senha, 10);
+
+    // Cria e salva o novo aluno
     const novoAluno = this.alunosRepository.create({
       ...createAlunoDto,
       senha: hashedSenha,
     });
+
     return this.alunosRepository.save(novoAluno);
   }
 
@@ -57,15 +70,26 @@ export class AlunosService {
     return this.alunosRepository.findOne({ where: { login } });
   }
 
-  async update(id: string, updateAlunoDto: UpdateAlunoDto) {
-    await this.alunosRepository.update(
-      { _id: new ObjectId(id) },
-      updateAlunoDto,
-    )
+  async updateByEmail(email: string, updateAlunoDto: UpdateAlunoDto): Promise<Omit<Aluno, '_id' | 'senha'>> {
+    const aluno = await this.alunosRepository.findOne({ where: { login: email } });
 
-    return this.findOne(id)
-    // return `This action updates a #${id} aluno`;
+    if (!aluno) {
+      throw new NotFoundException('Aluno não encontrado com esse e-mail');
+    }
+
+    await this.alunosRepository.update(aluno._id, updateAlunoDto);
+
+    const alunoAtualizado = await this.alunosRepository.findOne({ where: { _id: aluno._id } });
+
+    if (!alunoAtualizado) {
+      throw new NotFoundException('Erro ao atualizar: aluno não encontrado após atualização');
+    }
+    
+    // Remove _id e senha antes de retornar
+    const { _id, senha: _, ...alunoSemSenha } = aluno;
+    return alunoSemSenha;
   }
+
 
   async remove(id: string) {
     const aluno = await this.findOne(id)

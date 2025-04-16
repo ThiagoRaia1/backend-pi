@@ -2,12 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AlunosService } from './alunos.service';
 import { CreateAlunoDto } from './dto/create-aluno.dto';
 import { UpdateAlunoDto } from './dto/update-aluno.dto';
-import { Aluno } from './entities/aluno.entity';
 
 @Controller('alunos')
 export class AlunosController {
-  constructor(private readonly alunosService: AlunosService) {}
+  constructor(private readonly alunosService: AlunosService) { }
 
+  // Autetica o login
   @Post('login')
   async login(@Body() body: { login: string; senha: string }) {
     const { login, senha } = body;
@@ -34,9 +34,12 @@ export class AlunosController {
     return await this.alunosService.findOneByLogin(login);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAlunoDto: UpdateAlunoDto) {
-    return this.alunosService.update(id, updateAlunoDto);
+  @Patch(':login')
+  async atualizarAluno(
+    @Param('login') login: string,
+    @Body() updateAlunoDto: UpdateAlunoDto,
+  ) {
+    return this.alunosService.updateByEmail(login, updateAlunoDto);
   }
 
   @Delete(':id')
