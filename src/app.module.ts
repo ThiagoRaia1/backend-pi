@@ -1,22 +1,24 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AlunosModule } from './alunos/alunos.module';
-import { TypeOrmModule } from "@nestjs/typeorm"
 import { AulasModule } from './aulas/aulas.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(), // Carrega as variáveis do .env automaticamente
     TypeOrmModule.forRoot({
-      type: "mongodb",
-      url: "mongodb://127.0.0.1:27017/databasePI", // entender porque url: "mongodb://localhost:27017/databasePI" nao funcionou
+      type: 'mongodb',
+      url: process.env.MONGODB_URL,
+      synchronize: true, // Não usar true em produção
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true, // nao usar true em producao
     }),
     AlunosModule,
-    AulasModule
+    AulasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
