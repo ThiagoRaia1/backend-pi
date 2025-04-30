@@ -14,37 +14,45 @@ export class AulasService {
 
   async create(createAulaDto: CreateAulaDto): Promise<Aula> {
     const { emailAluno, data } = createAulaDto;
-  
+
     const dataConvertida = new Date(data);
-  
+
     const aulaExistente = await this.aulasRepository.findOne({
       where: {
         emailAluno,
         data: dataConvertida,
       },
     });
-  
+
     if (aulaExistente) {
       throw new ConflictException('Você já está registrado para esta aula.');
     }
-  
+
     const totalAlunosNoHorario = await this.aulasRepository.count({
       where: {
         data: dataConvertida,
       },
     });
-  
+
     if (totalAlunosNoHorario >= 5) {
       throw new ConflictException('Limite de alunos para este horário já foi atingido.');
     }
-  
+
     const novaAula = this.aulasRepository.create({
       emailAluno,
       data: dataConvertida,
     });
-  
+
     return this.aulasRepository.save(novaAula);
   }
+
+  async buscarPorLogin(login: string): Promise<Aula[]> {
+    return this.aulasRepository.find({
+      where: { emailAluno: login },
+      order: { data: 'ASC' }, // opcional: ordena por data crescente
+    });
+  }
+
 
   findAll() {
     return this.aulasRepository.find()
@@ -73,4 +81,24 @@ export class AulasService {
     }
     // return `This action removes a #${id} aluno`;
   }
+
+  async excluirPorLoginEData(login: string, dataHora: string) {
+    const data = new Date(dataHora);
+
+    const aula = await this.aulasRepository.findOne({
+      where: {
+        emailAluno: login,
+        data: data,
+      },
+    });
+
+    if (!aula) {
+      return { mensagem: 'Aula não encontrada.' };
+    }
+
+    await this.aulasRepository.remove(aula);
+
+    return { mensagem: 'Aula excluída com sucesso.' };
+  }
+
 }

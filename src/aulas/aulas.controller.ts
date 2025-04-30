@@ -17,6 +17,15 @@ export class AulasController {
     }
   }
 
+  @Get(':login')
+  async buscarPorLogin(@Param('login') login: string): Promise<Aula[]> {
+    try {
+      return await this.aulasService.buscarPorLogin(login);
+    } catch (error) {
+      throw new BadRequestException('Erro ao buscar aulas por login');
+    }
+  }
+
   @Get()
   findAll() {
     return this.aulasService.findAll();
@@ -35,5 +44,13 @@ export class AulasController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.aulasService.remove(id);
+  }
+
+  @Delete(':login/:dataHora')
+  excluirPorLoginEData(
+    @Param('login') login: string,
+    @Param('dataHora') dataHora: string,
+  ) {
+    return this.aulasService.excluirPorLoginEData(login, dataHora);
   }
 }
