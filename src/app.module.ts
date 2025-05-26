@@ -8,7 +8,7 @@ import { AulasModule } from './aulas/aulas.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(), // Carrega as variáveis do .env automaticamente
+    ConfigModule.forRoot({ isGlobal: true }), // Carrega as variáveis do .env automaticamente
     TypeOrmModule.forRoot({
       type: 'mongodb',
       url: process.env.MONGODB_URL,
