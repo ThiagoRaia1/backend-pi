@@ -18,7 +18,7 @@ export class UpdateAlunoDto extends PartialType(CreateAlunoDto) {
 
     @IsOptional()
     @IsString()
-    senha?: string;
+    senha: string;
 
     @IsOptional()
     @IsString()
