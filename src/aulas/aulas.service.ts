@@ -2,15 +2,16 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateAulaDto } from './dto/create-aula.dto';
 import { UpdateAulaDto } from './dto/update-aula.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectId, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { ObjectId } from 'mongodb';
 import { Aula } from './entities/aula.entity';
 
 @Injectable()
 export class AulasService {
   constructor(
     @InjectRepository(Aula)
-    private aulasRepository: Repository<Aula>
-  ) { }
+    private aulasRepository: Repository<Aula>,
+  ) {}
 
   async create(createAulaDto: CreateAulaDto): Promise<Aula> {
     const { emailAluno, data } = createAulaDto;
@@ -35,7 +36,9 @@ export class AulasService {
     });
 
     if (totalAlunosNoHorario >= 5) {
-      throw new ConflictException('Limite de alunos para este horário já foi atingido.');
+      throw new ConflictException(
+        'Limite de alunos para este horário já foi atingido.',
+      );
     }
 
     const novaAula = this.aulasRepository.create({
@@ -53,33 +56,27 @@ export class AulasService {
     });
   }
 
-
   findAll() {
-    return this.aulasRepository.find()
+    return this.aulasRepository.find();
     //return `This action returns all alunos`;
   }
 
   findOne(id: string) {
-    return this.aulasRepository.findOneBy({ _id: new ObjectId(id) })
+    return this.aulasRepository.findOneBy({ _id: new ObjectId(id) });
     // return `This action returns a #${id} aluno`;
   }
 
   async update(id: string, updateAulaDto: UpdateAulaDto) {
-    await this.aulasRepository.update(
-      { _id: new ObjectId(id) },
-      updateAulaDto,
-    )
+    await this.aulasRepository.update({ _id: new ObjectId(id) }, updateAulaDto);
 
-    return this.findOne(id)
+    return this.findOne(id);
     // return `This action updates a #${id} aluno`;
   }
 
   async remove(id: string) {
-    const aluno = await this.findOne(id)
-    if (aluno) {
-      return this.aulasRepository.remove(aluno)
-    }
-    // return `This action removes a #${id} aluno`;
+    await this.aulasRepository.delete({ _id: new ObjectId(id) });
+
+    return { mensagem: 'Aula excluída com sucesso.' };
   }
 
   async excluirPorLoginEData(login: string, dataHora: string) {
@@ -100,5 +97,4 @@ export class AulasService {
 
     return { mensagem: 'Aula excluída com sucesso.' };
   }
-
 }
