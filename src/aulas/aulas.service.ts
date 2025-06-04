@@ -2,7 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateAulaDto } from './dto/create-aula.dto';
 import { UpdateAulaDto } from './dto/update-aula.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { ObjectId } from 'mongodb';
 import { Aula } from './entities/aula.entity';
 
@@ -15,32 +15,81 @@ export class AulasService {
 
   async create(createAulaDto: CreateAulaDto): Promise<Aula> {
     const { emailAluno, data } = createAulaDto;
-
     const dataConvertida = new Date(data);
 
-    const aulaExistente = await this.aulasRepository.findOne({
+    const inicioDoDia = new Date(dataConvertida);
+    inicioDoDia.setHours(0, 0, 0, 0);
+    const fimDoDia = new Date(dataConvertida);
+    fimDoDia.setHours(23, 59, 59, 999);
+
+    const primeiroDiaDoMes = new Date(
+      dataConvertida.getFullYear(),
+      dataConvertida.getMonth(),
+      1,
+    );
+    const ultimoDiaDoMes = new Date(
+      dataConvertida.getFullYear(),
+      dataConvertida.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    // 1. Verifica se o aluno já está cadastrado em 30 aulas no mês
+    const aulasDoMes = await this.aulasRepository.find({
       where: {
         emailAluno,
-        data: dataConvertida,
       },
     });
 
-    if (aulaExistente) {
+    const aulasNoMes = aulasDoMes.filter((aula) => {
+      const aulaData = new Date(aula.data);
+      return aulaData >= primeiroDiaDoMes && aulaData <= ultimoDiaDoMes;
+    });
+
+    if (aulasNoMes.length >= 30) {
+      throw new ConflictException(
+        'Você já atingiu o limite de 30 aulas neste mês.',
+      );
+    }
+
+    // 2. Verifica se o aluno já está registrado para esta aula exata
+    const aulaMesmaHora = aulasDoMes.find((aula) => {
+      return new Date(aula.data).getTime() === dataConvertida.getTime();
+    });
+
+    if (aulaMesmaHora) {
       throw new ConflictException('Você já está registrado para esta aula.');
     }
 
-    const totalAlunosNoHorario = await this.aulasRepository.count({
+    // 3. Verifica se o aluno já tem 2 aulas no mesmo dia
+    const aulasNoDia = aulasDoMes.filter((aula) => {
+      const aulaData = new Date(aula.data);
+      return aulaData >= inicioDoDia && aulaData <= fimDoDia;
+    });
+
+    if (aulasNoDia.length >= 2) {
+      throw new ConflictException(
+        'Você já atingiu o limite de duas aulas por dia.',
+      );
+    }
+
+    // 4. Verifica se já existem 5 alunos registrados para a mesma data e hora
+    const totalAlunosMesmoHorario = await this.aulasRepository.count({
       where: {
         data: dataConvertida,
       },
     });
 
-    if (totalAlunosNoHorario >= 5) {
+    if (totalAlunosMesmoHorario >= 5) {
       throw new ConflictException(
         'Limite de alunos para este horário já foi atingido.',
       );
     }
 
+    // Cria a nova aula
     const novaAula = this.aulasRepository.create({
       emailAluno,
       data: dataConvertida,
