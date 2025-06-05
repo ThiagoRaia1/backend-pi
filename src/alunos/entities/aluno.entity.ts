@@ -25,4 +25,7 @@ export class Aluno {
 
     @Column()
     dataNascimento: Date
+
+    @Column()
+    imagem: string
 }

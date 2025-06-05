@@ -27,4 +27,7 @@ export class CreateAlunoDto {
 
   @IsDateString()
   dataNascimento: Date
+
+  @IsString()
+  imagem: string
 }

@@ -35,4 +35,8 @@ export class UpdateAlunoDto extends PartialType(CreateAlunoDto) {
     @IsOptional()
     @IsDateString()
     dataNascimento?: Date;
+    
+    @IsOptional()
+    @IsString()
+    imagem?: string;
 }
