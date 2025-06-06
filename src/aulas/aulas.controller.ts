@@ -20,9 +20,21 @@ export class AulasController {
   @Get(':login')
   async buscarPorLogin(@Param('login') login: string): Promise<Aula[]> {
     try {
+      console.log("Entrou buscarPorLogin")
       return await this.aulasService.buscarPorLogin(login);
     } catch (error) {
       throw new BadRequestException('Erro ao buscar aulas por login');
+    }
+  }
+
+  @Get('horario/:data')
+  async buscarPorData(@Param('data') data: string): Promise<Aula[]> {
+    try {
+      console.log("Entrou buscarPorData")
+      const dataConvertida = new Date(data)
+      return await this.aulasService.buscarPorData(dataConvertida);
+    } catch (error) {
+      throw new BadRequestException('Erro ao buscar aulas por data');
     }
   }
 
@@ -33,6 +45,7 @@ export class AulasController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+      console.log("Entrou findOne id")
     return this.aulasService.findOne(id);
   }
 

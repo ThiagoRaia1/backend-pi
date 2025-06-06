@@ -105,6 +105,13 @@ export class AulasService {
     });
   }
 
+  async buscarPorData(data: Date): Promise<Aula[]> {
+    return this.aulasRepository.find({
+      where: { data },
+      order: { data: 'ASC' }, // opcional: ordena por data crescente
+    });
+  }
+
   findAll() {
     return this.aulasRepository.find();
     //return `This action returns all alunos`;
