@@ -28,11 +28,11 @@ export class AulasController {
   }
 
   @Get('horario/:data')
-  async buscarPorData(@Param('data') data: string): Promise<Aula[]> {
+  async buscarHorariosCheios(@Param('data') data: string): Promise<string[]> {
     try {
-      console.log("Entrou buscarPorData")
+      // console.log("Entrou buscarPorData")
       const dataConvertida = new Date(data)
-      return await this.aulasService.buscarPorData(dataConvertida);
+      return await this.aulasService.buscarHorariosCheios(dataConvertida);
     } catch (error) {
       throw new BadRequestException('Erro ao buscar aulas por data');
     }

@@ -105,11 +105,34 @@ export class AulasService {
     });
   }
 
-  async buscarPorData(data: Date): Promise<Aula[]> {
-    return this.aulasRepository.find({
-      where: { data },
-      order: { data: 'ASC' }, // opcional: ordena por data crescente
-    });
+  async buscarHorariosCheios(data: Date): Promise<string[]> {
+    const horariosCheios: string[] = [];
+    data.setDate(data.getDate() + 1);
+
+    for (let hora = 6; hora <= 17; hora++) {
+      // const inicio = new Date(data);
+      // inicio.setHours(hora, 0, 0, 0);
+
+      // const fim = new Date(data);
+      // fim.setHours(hora, 59, 59, 999);
+
+      data.setHours(hora);
+
+      const aulas = await this.aulasRepository.find({
+        where: { data },
+      });
+
+      // console.log('aulas na data ', data, ':' + aulas);
+
+      if (aulas.length >= 5) {
+        const horaStr = `${hora.toString().padStart(2, '0')}:00`;
+        horariosCheios.push(horaStr);
+      }
+    }
+
+    console.log(horariosCheios);
+
+    return horariosCheios;
   }
 
   findAll() {
