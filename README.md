@@ -1,3 +1,33 @@
+<h1 align="center">Plenitude Pilates</h1>
+
+<h2> Descrição </h2>
+Projeto Integrador para a faculdade de Análise e Desenvolvimentos da Fatec Indaiatuba<br>
+Back-end da aplicação Plenitude Pilates, feita para que os alunos já cadastrados pelo estúdio possam gerenciar suas aulas.<br>
+Front-end da aplicação: https://github.com/ThiagoRaia1/Pi-5o-Semestre
+
+## Baixando o projeto
+
+1.  Clone o repositório:
+
+    ```bash
+    git clone https://github.com/ThiagoRaia1/backend-pi
+
+2. Vá para o diretório
+   
+   ```bash
+   cd backend-pi
+   
+3. Instale as dependências
+
+   ```bash
+   npm i
+
+4. Inicie o programa
+
+   ```bash
+   npm run start:dev
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
